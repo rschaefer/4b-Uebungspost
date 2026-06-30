@@ -263,15 +263,13 @@
   <div id="appArea" class="hidden">
 
     <div class="hinweis">
-      📚 <strong>Das ist eine Übung.</strong> Es werden keine echten E-Mails verschickt. Wenn du auf „Senden" drückst, wird eine Datei in der Dateien-App unter <strong>Downloads</strong> gespeichert. Schicke sie per <strong>AirDrop an die Lehrkraft</strong> – sie legt die Mail dann in deinen Posteingang. Mit „🔄 Posteingang aktualisieren" holst du dir neue Mails ab.
+      📚 <strong>Das ist eine Übung.</strong> Es werden keine echten E-Mails verschickt. Beim „Senden" wird deine Nachricht gespeichert. Mit „🔄 Synchronisieren" holt sich dein Postfach neue Nachrichten ab.
     </div>
 
     <div class="topbar">
       <div class="me">Du bist angemeldet als <strong id="meAddr"></strong></div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn-secondary" onclick="fetchFromGithub()">🔄 Posteingang aktualisieren</button>
-        <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📥 Datei importieren</button>
-        <input type="file" id="importInput" accept=".html,.txt" style="display:none" onchange="importMailFile(event)">
+        <button class="btn-secondary" onclick="fetchFromGithub()">🔄 Synchronisieren</button>
         <button class="btn-ghost" onclick="logout()">Andere Person</button>
       </div>
     </div>
@@ -336,9 +334,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const GITHUB_OWNER = "rschaefer";
-const GITHUB_REPO = "4b-Uebungspost";
-const GITHUB_BRANCH = "main";
+const FIREBASE_PROJECT_ID = "uebungspost-4b";
 
 let me = null;
 let currentRead = null;
@@ -416,80 +412,62 @@ function renderOutbox(){
   });
 }
 
-const knownGithubFiles = new Set();
+let receivedMails = [];
 
 async function fetchFromGithub(){
   const status = document.getElementById('githubStatus');
   const slug = slugify(me.display);
-  const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/mailboxes/${slug}?ref=${GITHUB_BRANCH}`;
+  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery`;
 
   status.textContent = "🔄 Suche neue Mails...";
 
+  const query = {
+    structuredQuery: {
+      from: [{ collectionId: "mails" }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: "to" },
+          op: "EQUAL",
+          value: { stringValue: slug }
+        }
+      }
+    }
+  };
+
   try{
-    const res = await fetch(apiUrl);
-    if(res.status === 404){
-      status.textContent = `Noch kein Ordner "mailboxes/${slug}" im Repository gefunden. Frag deine Lehrkraft, ob er schon angelegt wurde.`;
-      return;
-    }
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query)
+    });
     if(!res.ok){
-      status.textContent = "⚠️ Abruf nicht möglich (Internetverbindung prüfen).";
+      status.textContent = "⚠️ Abruf nicht möglich. Internetverbindung oder Firebase-Einrichtung prüfen.";
       return;
     }
-    const files = await res.json();
-    const mailFiles = files.filter(f => f.type === 'file' && (f.name.endsWith('.html') || f.name.endsWith('.txt')));
+    const results = await res.json();
+    const docs = results.filter(r => r.document).map(r => r.document);
 
+    const knownNames = new Set(receivedMails.map(m => m._docName));
     let newCount = 0;
-    for(const f of mailFiles){
-      if(knownGithubFiles.has(f.path)) continue;
-      const rawRes = await fetch(f.download_url);
-      const text = await rawRes.text();
-      const parsed = parseIncomingMail(text, f.name);
-      sampleMails.unshift(parsed);
-      knownGithubFiles.add(f.path);
+    docs.forEach(doc => {
+      if(knownNames.has(doc.name)) return;
+      const f = doc.fields || {};
+      receivedMails.unshift({
+        _docName: doc.name,
+        from: f.from?.stringValue || "unbekannt@4b.de",
+        subject: f.subject?.stringValue || "(kein Betreff)",
+        body: f.body?.stringValue || "",
+        cc: f.cc?.stringValue || "",
+        dateStr: f.dateStr?.stringValue || ""
+      });
       newCount++;
-    }
+    });
 
-    if(newCount > 0){
-      renderInbox();
-      status.textContent = `✅ ${newCount} neue Mail(s) geladen.`;
-    } else {
-      status.textContent = "Keine neuen Mails gefunden.";
-    }
+    renderInbox();
+    status.textContent = newCount > 0 ? `✅ ${newCount} neue Mail(s) geladen.` : "Keine neuen Mails gefunden.";
   }catch(err){
     status.textContent = "⚠️ Fehler beim Abruf. Internetverbindung prüfen.";
   }
-}
-
-function importMailFile(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const parsed = parseIncomingMail(e.target.result, file.name);
-    sampleMails.unshift(parsed);
-    renderInbox();
-    showToast("📥 Mail wurde importiert!");
-  };
-  reader.readAsText(file);
-  event.target.value = "";
-}
-
-function parseIncomingMail(text, filename){
-  // Versucht, Von/Betreff/Text aus einer per AirDrop empfangenen Mail-Datei zu lesen.
-  let from = "unbekannt@4b.de", subject = filename, body = text;
-  const fromMatch = text.match(/Von:\s*<strong>([^<]+)/i) || text.match(/From:\s*([^\n<]+)/i);
-  const subjMatch = text.match(/class="subject">([^<]+)</i) || text.match(/Betreff:\s*([^\n<]+)/i);
-  const bodyMatch = text.match(/class="body">([\s\S]*?)<\/div>/i);
-  if(fromMatch) from = fromMatch[1].trim();
-  if(subjMatch) subject = subjMatch[1].trim();
-  if(bodyMatch){
-    const tmp = document.createElement('div');
-    tmp.innerHTML = bodyMatch[1];
-    body = tmp.textContent.trim();
-  } else if(!bodyMatch && text.length < 4000){
-    body = text;
-  }
-  return { from, subject, body };
 }
 
 function showTab(which){
@@ -505,7 +483,8 @@ function showTab(which){
 function renderInbox(){
   const list = document.getElementById('inboxList');
   list.innerHTML = "";
-  sampleMails.forEach((m, i) => {
+  const all = sampleMails.concat(receivedMails);
+  all.forEach((m, i) => {
     const div = document.createElement('div');
     div.className = 'inbox-item';
     div.onclick = () => openMail(i);
@@ -519,7 +498,8 @@ function renderInbox(){
 }
 
 function openMail(i){
-  currentRead = sampleMails[i];
+  const all = sampleMails.concat(receivedMails);
+  currentRead = all[i];
   document.getElementById('inboxView').classList.add('hidden');
   document.getElementById('writeView').classList.add('hidden');
   document.getElementById('readView').classList.remove('hidden');
@@ -557,44 +537,54 @@ function showToast(msg){
 }
 
 async function sendMail(){
-  const to = document.getElementById('fieldTo').value.trim();
+  const toRaw = document.getElementById('fieldTo').value.trim();
   const cc = document.getElementById('fieldCc').value.trim();
   const subject = document.getElementById('fieldSubject').value.trim();
   const body = document.getElementById('fieldBody').value.trim();
 
-  if(!to || !subject || !body){
+  if(!toRaw || !subject || !body){
     alert("Bitte fülle mindestens An, Betreff und Nachricht aus.");
     return;
   }
 
+  const toSlug = slugify(toRaw.split('@')[0]);
   const now = new Date();
   const dateStr = now.toLocaleDateString('de-DE') + " " + now.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
-  const html = buildMailHtml(me.address, to, cc, subject, body, dateStr);
-  const safeSubject = subject.replace(/[^a-z0-9äöüß]+/gi,'_').slice(0,30);
-  const filename = `uebungsmail_${Date.now()}_${safeSubject || 'ohne_betreff'}.html`;
 
-  outboxMails.push({to, cc, subject, body, dateStr});
-  renderOutbox();
+  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/mails`;
+  const docBody = {
+    fields: {
+      to: { stringValue: toSlug },
+      toDisplay: { stringValue: toRaw },
+      cc: { stringValue: cc },
+      from: { stringValue: me.address },
+      subject: { stringValue: subject },
+      body: { stringValue: body },
+      dateStr: { stringValue: dateStr }
+    }
+  };
 
-  downloadMailFile(html, filename);
-  showToast("✅ Mail gespeichert! Du findest sie in der Dateien-App unter Downloads.");
+  try{
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(docBody)
+    });
+    if(!res.ok){
+      showToast("⚠️ Senden fehlgeschlagen. Firebase-Einrichtung prüfen.");
+      return;
+    }
+    outboxMails.push({to: toRaw, cc, subject, body, dateStr});
+    renderOutbox();
+    showToast("✅ Mail gespeichert! Empfänger sieht sie nach Synchronisieren.");
 
-  document.getElementById('fieldTo').value = "";
-  document.getElementById('fieldCc').value = "";
-  document.getElementById('fieldSubject').value = "";
-  document.getElementById('fieldBody').value = "";
-}
-
-function downloadMailFile(html, filename){
-  const blob = new Blob([html], {type:"text/html"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+    document.getElementById('fieldTo').value = "";
+    document.getElementById('fieldCc').value = "";
+    document.getElementById('fieldSubject').value = "";
+    document.getElementById('fieldBody').value = "";
+  }catch(err){
+    showToast("⚠️ Fehler beim Senden. Internetverbindung prüfen.");
+  }
 }
 
 function buildMailHtml(from, to, cc, subject, body, dateStr){
