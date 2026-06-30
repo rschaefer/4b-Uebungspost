@@ -192,6 +192,28 @@
     background:#fff;
     transition:transform .12s;
   }
+  .inbox-item.unread{
+    border-color:var(--postbox-red);
+    background:#fff8f6;
+  }
+  .inbox-item.unread .subj{font-weight:800;}
+  .unread-dot{
+    display:inline-block;
+    width:8px; height:8px;
+    background:var(--postbox-red);
+    border-radius:50%;
+    margin-right:6px;
+  }
+  #unreadBadge:not(:empty){
+    display:inline-block;
+    background:var(--postbox-red);
+    color:#fff;
+    font-size:11px;
+    font-weight:800;
+    padding:1px 7px;
+    border-radius:10px;
+    margin-left:4px;
+  }
   .inbox-item:hover{transform:translateX(3px);}
   .inbox-item .from{font-weight:700; font-size:14px;}
   .inbox-item .subj{font-size:14.5px; margin-top:2px;}
@@ -254,7 +276,7 @@
   <div class="card" id="loginCard">
     <h2>Wie heißt du?</h2>
     <p style="color:#857c6a; font-size:14px;">Gib deinen Vornamen ein. Daraus machen wir deine Übungs-Adresse.</p>
-    <input type="text" id="nameInput" placeholder="z. B. Lukas" maxlength="20">
+    <input type="text" id="nameInput" placeholder="z. B. Thomas" maxlength="20">
     <div class="addr-display" id="addrPreview">&nbsp;</div>
     <button class="btn-primary" onclick="login()">Postfach öffnen</button>
   </div>
@@ -276,8 +298,8 @@
     <p id="githubStatus" style="font-size:13px; color:#857c6a; margin:-10px 0 16px;"></p>
 
     <div class="tabs">
-      <div class="tab active" id="tabInbox" onclick="showTab('inbox')">📥 Posteingang</div>
-      <div class="tab" id="tabOutbox" onclick="showTab('outbox')">📤 Postausgang</div>
+      <div class="tab active" id="tabInbox" onclick="showTab('inbox')">📥 Posteingang <span id="unreadBadge"></span></div>
+      <div class="tab" id="tabOutbox" onclick="showTab('outbox')">📤 Gesendet</div>
       <div class="tab" id="tabWrite" onclick="showTab('write')">✏️ Neue Mail</div>
     </div>
 
@@ -289,7 +311,7 @@
 
     <!-- OUTBOX -->
     <div class="card hidden" id="outboxView">
-      <h2>Postausgang</h2>
+      <h2>Gesendet</h2>
       <p style="color:#857c6a; font-size:14px;" id="outboxEmpty">Du hast noch keine Mails gesendet.</p>
       <div id="outboxList"></div>
     </div>
@@ -341,19 +363,16 @@ let currentRead = null;
 
 const sampleMails = [
   {
+    _docName: "sample-1",
     from: "lehrerin.frau-kirchmeier@4b.de",
     subject: "Willkommen bei ÜbungsPost! 🎉",
     body: "Hallo!\n\nSchön, dass du dabei bist. Hier kannst du üben, wie man eine E-Mail schreibt: mit einer Anrede, einem Text und einem freundlichen Schluss.\n\nKlicke oben auf \"Neue Mail\", um selbst eine zu schreiben!\n\nViele Grüße\nFrau Kirchmeier"
   },
   {
+    _docName: "sample-2",
     from: "postbote@4b.de",
     subject: "So liest man eine E-Mail",
     body: "Hallo,\n\ndas hier ist eine Beispiel-Mail. Oben siehst du, von wem sie kommt und worum es geht. Darunter steht der Text.\n\nWenn du möchtest, kannst du auf \"Antworten\" klicken und selbst eine Antwort schreiben.\n\nLiebe Grüße\ndein ÜbungsPost-Team"
-  },
-  {
-    from: "mia@4b.de",
-    subject: "Hast du Lust, am Wochenende zu spielen?",
-    body: "Hi!\n\nIch wollte fragen, ob du am Samstag Zeit hast, mit mir im Park Fahrrad zu fahren.\n\nMeld dich!\nMia"
   }
 ];
 
@@ -480,26 +499,44 @@ function showTab(which){
   document.getElementById('writeView').classList.toggle('hidden', which!=='write');
 }
 
+function getReadIds(){
+  try{
+    return new Set(JSON.parse(localStorage.getItem('read:' + me.address) || '[]'));
+  }catch(e){ return new Set(); }
+}
+
+function markAsRead(id){
+  const readIds = getReadIds();
+  readIds.add(id);
+  localStorage.setItem('read:' + me.address, JSON.stringify([...readIds]));
+}
+
 function renderInbox(){
   const list = document.getElementById('inboxList');
   list.innerHTML = "";
+  const readIds = getReadIds();
   const all = sampleMails.concat(receivedMails);
+  let unreadCount = 0;
   all.forEach((m, i) => {
+    const isUnread = !readIds.has(m._docName);
+    if(isUnread) unreadCount++;
     const div = document.createElement('div');
-    div.className = 'inbox-item';
+    div.className = 'inbox-item' + (isUnread ? ' unread' : '');
     div.onclick = () => openMail(i);
     div.innerHTML = `
-      <div class="from">${escapeHtml(m.from)}</div>
+      <div class="from">${isUnread ? '<span class="unread-dot"></span>' : ''}${escapeHtml(m.from)}</div>
       <div class="subj">${escapeHtml(m.subject)}</div>
       <div class="preview">${escapeHtml(m.body.slice(0,60))}...</div>
     `;
     list.appendChild(div);
   });
+  document.getElementById('unreadBadge').textContent = unreadCount > 0 ? unreadCount : '';
 }
 
 function openMail(i){
   const all = sampleMails.concat(receivedMails);
   currentRead = all[i];
+  markAsRead(currentRead._docName);
   document.getElementById('inboxView').classList.add('hidden');
   document.getElementById('writeView').classList.add('hidden');
   document.getElementById('readView').classList.remove('hidden');
