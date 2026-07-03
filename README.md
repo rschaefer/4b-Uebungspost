@@ -131,4 +131,4 @@ Diese Regeln erlauben allen Lesenden und Schreibenden Zugriff auf die Mails-Coll
 
 ---
 
-*Erstellt als Gastprojekt für die Klasse 4b · ÜbungsPost ist ein Lernprojekt, keine echte E-Mail-Anwendung.*
+*Erstellt im Juni 2026 als Gastprojekt für die Klasse 4b · ÜbungsPost ist ein Lernprojekt, keine echte E-Mail-Anwendung.*
