@@ -290,12 +290,12 @@
 
     <div class="topbar">
       <div class="me">Du bist angemeldet als <strong id="meAddr"></strong></div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn-secondary" onclick="fetchFromGithub()">🔄 Synchronisieren</button>
-        <button class="btn-ghost" onclick="logout()">Andere Person</button>
-      </div>
+      <button class="btn-ghost" onclick="logout()">Andere Person</button>
     </div>
-    <p id="githubStatus" style="font-size:13px; color:#857c6a; margin:-10px 0 16px;"></p>
+    <div style="margin:-10px 0 6px;">
+      <button class="btn-secondary" onclick="fetchFromGithub()">🔄 Synchronisieren</button>
+    </div>
+    <p id="githubStatus" style="font-size:13px; color:#857c6a; margin:0 0 16px;"></p>
 
     <div class="tabs">
       <div class="tab active" id="tabInbox" onclick="showTab('inbox')">📥 Posteingang <span id="unreadBadge"></span></div>
@@ -339,13 +339,15 @@
           <input type="text" id="fieldTo" placeholder="empfaenger@4b.de">
         </div>
       </div>
-      <label>Kopie (Cc) – optional</label>
+      <label>Kopie (Cc) – optional, alle sehen diese Adresse</label>
       <input type="text" id="fieldCc" placeholder="z. B. mama@4b.de">
+      <label>Blindkopie (Bcc) – optional, niemand außer dem Empfänger sieht diese Adresse</label>
+      <input type="text" id="fieldBcc" placeholder="z. B. papa@4b.de">
       <label>Betreff</label>
       <input type="text" id="fieldSubject" placeholder="Worum geht's?">
       <label>Nachricht</label>
       <textarea id="fieldBody" placeholder="Schreib hier deine Nachricht..."></textarea>
-      <button class="btn-primary" onclick="sendMail()">📨 Senden (als Datei speichern)</button>
+      <button class="btn-primary" onclick="sendMail()">📨 Senden</button>
     </div>
 
   </div>
@@ -423,7 +425,7 @@ function renderOutbox(){
     const div = document.createElement('div');
     div.className = 'inbox-item';
     div.innerHTML = `
-      <div class="from">An: ${escapeHtml(m.to)}${m.cc ? " · Cc: " + escapeHtml(m.cc) : ""}</div>
+      <div class="from">An: ${escapeHtml(m.to)}${m.cc ? " · Cc: " + escapeHtml(m.cc) : ""}${m.bcc ? " · Bcc: " + escapeHtml(m.bcc) : ""}</div>
       <div class="subj">${escapeHtml(m.subject)}</div>
       <div class="preview">${escapeHtml(m.body.slice(0,60))}... · ${escapeHtml(m.dateStr)}</div>
     `;
@@ -473,11 +475,12 @@ async function fetchFromGithub(){
       const f = doc.fields || {};
       receivedMails.unshift({
         _docName: doc.name,
-        from: f.from?.stringValue || "unbekannt@4b.de",
-        subject: f.subject?.stringValue || "(kein Betreff)",
-        body: f.body?.stringValue || "",
-        cc: f.cc?.stringValue || "",
-        dateStr: f.dateStr?.stringValue || ""
+        from:      f.from?.stringValue      || "unbekannt@4b.de",
+        toDisplay: f.toDisplay?.stringValue || "",
+        subject:   f.subject?.stringValue   || "(kein Betreff)",
+        body:      f.body?.stringValue      || "",
+        cc:        f.cc?.stringValue        || "",
+        dateStr:   f.dateStr?.stringValue   || ""
       });
       newCount++;
     });
@@ -537,11 +540,15 @@ function openMail(i){
   const all = sampleMails.concat(receivedMails);
   currentRead = all[i];
   markAsRead(currentRead._docName);
+  renderInbox();
   document.getElementById('inboxView').classList.add('hidden');
   document.getElementById('writeView').classList.add('hidden');
   document.getElementById('readView').classList.remove('hidden');
   document.getElementById('readMeta').innerHTML =
-    `Von: <strong>${escapeHtml(currentRead.from)}</strong><br>An: ${escapeHtml(me.address)}<br>Betreff: <strong>${escapeHtml(currentRead.subject)}</strong>`;
+    `Von: <strong>${escapeHtml(currentRead.from)}</strong><br>`+
+    `An: ${escapeHtml(currentRead.toDisplay || me.address)}<br>`+
+    (currentRead.cc ? `Cc: ${escapeHtml(currentRead.cc)}<br>` : '')+
+    `Betreff: <strong>${escapeHtml(currentRead.subject)}</strong>`;
   document.getElementById('readBody').textContent = currentRead.body;
 }
 
@@ -573,52 +580,99 @@ function showToast(msg){
   setTimeout(()=> t.classList.remove('show'), 2400);
 }
 
+// Hilfsfunktion: eine Mail für genau einen Empfänger in Firestore speichern
+async function saveMailForRecipient(recipientSlug, {from, toDisplay, cc, subject, body, dateStr}){
+  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/mails`;
+  const docBody = {
+    fields: {
+      to:        { stringValue: recipientSlug },
+      toDisplay: { stringValue: toDisplay },
+      cc:        { stringValue: cc },
+      from:      { stringValue: from },
+      subject:   { stringValue: subject },
+      body:      { stringValue: body },
+      dateStr:   { stringValue: dateStr }
+    }
+  };
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(docBody)
+  });
+  return res.ok;
+}
+
 async function sendMail(){
-  const toRaw = document.getElementById('fieldTo').value.trim();
-  const cc = document.getElementById('fieldCc').value.trim();
+  const toRaw   = document.getElementById('fieldTo').value.trim();
+  const ccRaw   = document.getElementById('fieldCc').value.trim();
+  const bccRaw  = document.getElementById('fieldBcc').value.trim();
   const subject = document.getElementById('fieldSubject').value.trim();
-  const body = document.getElementById('fieldBody').value.trim();
+  const body    = document.getElementById('fieldBody').value.trim();
 
   if(!toRaw || !subject || !body){
     alert("Bitte fülle mindestens An, Betreff und Nachricht aus.");
     return;
   }
 
-  const toSlug = slugify(toRaw.split('@')[0]);
   const now = new Date();
   const dateStr = now.toLocaleDateString('de-DE') + " " + now.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
 
-  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/mails`;
-  const docBody = {
-    fields: {
-      to: { stringValue: toSlug },
-      toDisplay: { stringValue: toRaw },
-      cc: { stringValue: cc },
-      from: { stringValue: me.address },
-      subject: { stringValue: subject },
-      body: { stringValue: body },
-      dateStr: { stringValue: dateStr }
-    }
+  // Adressen parsen – mehrere Empfänger durch Komma oder Semikolon trennbar
+  const parseAddrs = raw => raw ? raw.split(/[,;]/).map(a => a.trim()).filter(Boolean) : [];
+  const toList  = parseAddrs(toRaw);
+  const ccList  = parseAddrs(ccRaw);
+  const bccList = parseAddrs(bccRaw);
+
+  // Was alle sichtbaren Empfänger in der Mail-Kopfzeile sehen:
+  const toDisplay = toList.join(', ');
+  const ccDisplay = ccList.join(', ');
+  // Bcc bleibt leer in der gespeicherten Mail (niemand sieht die anderen Bcc-Empfänger)
+
+  const mailData = {
+    from: me.address,
+    toDisplay,
+    cc: ccDisplay,
+    subject,
+    body,
+    dateStr
   };
 
   try{
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(docBody)
+    const allRecipients = [
+      ...toList.map(a => ({ slug: slugify(a.split('@')[0]), isBcc: false })),
+      ...ccList.map(a => ({ slug: slugify(a.split('@')[0]), isBcc: false })),
+      ...bccList.map(a => ({ slug: slugify(a.split('@')[0]), isBcc: true }))
+    ];
+
+    // Doppelte Slugs deduplizieren
+    const seen = new Set();
+    const unique = allRecipients.filter(r => {
+      if(seen.has(r.slug)) return false;
+      seen.add(r.slug);
+      return true;
     });
-    if(!res.ok){
-      showToast("⚠️ Senden fehlgeschlagen. Firebase-Einrichtung prüfen.");
+
+    let allOk = true;
+    for(const r of unique){
+      const ok = await saveMailForRecipient(r.slug, mailData);
+      if(!ok) allOk = false;
+    }
+
+    if(!allOk){
+      showToast("⚠️ Mindestens eine Zustellung fehlgeschlagen.");
       return;
     }
-    outboxMails.push({to: toRaw, cc, subject, body, dateStr});
-    renderOutbox();
-    showToast("✅ Mail gespeichert! Empfänger sieht sie nach Synchronisieren.");
 
-    document.getElementById('fieldTo').value = "";
-    document.getElementById('fieldCc').value = "";
+    outboxMails.push({to: toDisplay, cc: ccDisplay, bcc: bccRaw, subject, body, dateStr});
+    renderOutbox();
+    const anzahl = unique.length;
+    showToast(`✅ Mail an ${anzahl} Empfänger gespeichert!`);
+
+    document.getElementById('fieldTo').value  = "";
+    document.getElementById('fieldCc').value  = "";
+    document.getElementById('fieldBcc').value = "";
     document.getElementById('fieldSubject').value = "";
-    document.getElementById('fieldBody').value = "";
+    document.getElementById('fieldBody').value    = "";
   }catch(err){
     showToast("⚠️ Fehler beim Senden. Internetverbindung prüfen.");
   }
