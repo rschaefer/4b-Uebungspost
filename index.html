@@ -264,8 +264,51 @@
 
 <div class="stamp-corner">✉️</div>
 
+<!-- Info-Modal -->
+<div id="infoOverlay" onclick="closeInfo()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; padding:20px; overflow-y:auto;">
+  <div onclick="event.stopPropagation()" style="max-width:560px; margin:40px auto; background:#fffdf9; border-radius:16px; padding:30px; box-shadow:0 8px 32px rgba(0,0,0,.18); position:relative;">
+    <button onclick="closeInfo()" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#857c6a;">✕</button>
+    <h2 style="margin-top:0; font-size:20px;">Was ist ÜbungsPost?</h2>
+    <p>ÜbungsPost simuliert einen E-Mail-Client im Browser. Kinder lernen:</p>
+    <ul style="line-height:1.8;">
+      <li>Wie eine E-Mail aufgebaut ist (Von, An, Cc, Bcc, Betreff, Nachricht)</li>
+      <li>Wie man eine E-Mail schreibt und abschickt</li>
+      <li>Was Cc (Kopie) und Bcc (Blindkopie) bedeuten</li>
+      <li>Wie ein Posteingang und ein Gesendet-Ordner funktionieren</li>
+    </ul>
+    <p>Es werden keine echten E-Mails verschickt. Alle Nachrichten bleiben innerhalb der App.</p>
+
+    <h3 style="font-size:16px; margin-top:22px;">So funktioniert es</h3>
+    <ol style="line-height:1.9;">
+      <li><strong>Vornamen eingeben</strong> – die App erstellt daraus eine Übungs-Adresse (z.&nbsp;B. <code>thomas@4b.de</code>)</li>
+      <li><strong>Posteingang lesen</strong> – drei Beispielmails warten bereits</li>
+      <li><strong>Neue Mail schreiben</strong> – Tab „Neue Mail" antippen, Felder ausfüllen, „Senden" drücken</li>
+      <li><strong>Synchronisieren</strong> – der Empfänger tippt auf „🔄 Synchronisieren", die neue Mail erscheint im Posteingang</li>
+    </ol>
+
+    <h3 style="font-size:16px; margin-top:22px;">Wichtige Hinweise</h3>
+    <ul style="line-height:1.8;">
+      <li><strong>Groß-/Kleinschreibung:</strong> Namen werden automatisch umgewandelt (<em>Thomas</em> → <code>thomas@4b.de</code>). Umlaute werden ersetzt (ä→ae, ö→oe, ü→ue, ß→ss).</li>
+      <li><strong>Mehrere Empfänger</strong> im An-, Cc- oder Bcc-Feld durch Komma trennen: <code>thomas@4b.de, chiara@4b.de</code></li>
+      <li><strong>Bcc:</strong> Der Empfänger erhält die Mail, aber kein anderer sieht seine Adresse.</li>
+      <li><strong>Ungelesene Mails</strong> werden mit einem roten Punkt markiert und gelten als gelesen, sobald sie angeklickt werden.</li>
+    </ul>
+
+    <h3 style="font-size:16px; margin-top:22px;">Datenschutz</h3>
+    <ul style="line-height:1.8;">
+      <li>Es werden <strong>keine echten Namen</strong> erfasst – nur frei wählbare Vornamen als Pseudonyme</li>
+      <li>Es werden <strong>keine Passwörter</strong> gespeichert</li>
+      <li>Die Datenbank liegt auf <strong>Servern in der EU</strong></li>
+    </ul>
+    <p style="font-size:12px; color:#9a907c; margin-top:20px;">ÜbungsPost ist ein Lernprojekt, keine echte E-Mail-Anwendung.</p>
+  </div>
+</div>
+
 <header>
-  <div class="logo"><span class="box"></span> ÜbungsPost</div>
+  <div style="position:relative; display:inline-block;">
+    <div class="logo"><span class="box"></span> ÜbungsPost</div>
+    <button onclick="openInfo()" title="Informationen" style="position:absolute; top:-6px; right:-30px; background:none; border:2px solid var(--stamp-blue); color:var(--stamp-blue); border-radius:50%; width:22px; height:22px; font-size:12px; font-weight:800; cursor:pointer; line-height:1; padding:0;">i</button>
+  </div>
   <div class="badge">Schul-Übung · Klasse 4b</div>
   <div class="subtitle">So funktioniert das Schreiben von E-Mails – ganz ohne echten Versand.</div>
 </header>
@@ -335,7 +378,7 @@
           <input type="text" id="fieldFrom" disabled>
         </div>
         <div>
-          <label>An (z. B. mia@4b.de)</label>
+          <label>An (z. B. thomas@4b.de)</label>
           <input type="text" id="fieldTo" placeholder="empfaenger@4b.de">
         </div>
       </div>
@@ -347,7 +390,7 @@
       <input type="text" id="fieldSubject" placeholder="Worum geht's?">
       <label>Nachricht</label>
       <textarea id="fieldBody" placeholder="Schreib hier deine Nachricht..."></textarea>
-      <button class="btn-primary" onclick="sendMail()">📨 Senden</button>
+      <button class="btn-primary" onclick="sendMail()">📨 Senden (als Datei speichern)</button>
     </div>
 
   </div>
@@ -359,6 +402,14 @@
 
 <script>
 const FIREBASE_PROJECT_ID = "uebungspost-4b";
+
+function openInfo(){
+  document.getElementById('infoOverlay').style.display = 'block';
+}
+function closeInfo(){
+  document.getElementById('infoOverlay').style.display = 'none';
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeInfo(); });
 
 let me = null;
 let currentRead = null;
