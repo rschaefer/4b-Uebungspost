@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>KI und ihre Anwendungen – Mindmap</title>
+<style>
+  :root {
+    --bg: #fdf9f0;
+    --ink: #2b2b2b;
+    --accent: #5B7FDE;
+    --card-bg: #ffffff;
+    --border: #e6dfd3;
+    --lang: #5B7FDE;
+    --alltag: #E0A227;
+    --unterhaltung: #C1447E;
+    --mobil: #2E9E7E;
+    --schulapps: #1F8A8C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 30px 20px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  header h1 { margin: 0; font-size: 2rem; color: #333; }
+  header p { margin: 5px 0 0; color: #666; font-size: 1.1rem; }
+  
+  .stage {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  }
+  
+  .center-node {
+    background: #edf4fe;
+    border: 2px solid var(--accent);
+    color: var(--ink);
+    padding: 20px;
+    font-weight: bold;
+    font-size: 1.4rem;
+    border-radius: 50%;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 40px;
+    text-align: center;
+  }
+  
+  .flex-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .branch {
+    background: var(--bg);
+    border-left: 5px solid var(--color);
+    padding: 15px;
+    border-radius: 6px;
+    width: 280px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .branch:hover {
+    background: #f3edd8;
+  }
+  .branch h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.15rem;
+    color: var(--color);
+  }
+  
+  #panel {
+    margin-top: 30px;
+    background: #faf7f0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    display: none;
+    text-align: left;
+  }
+  #panel.open { display: block; }
+  #panel h2 { margin-top: 0; font-size: 1.4rem; color: var(--accent); }
+  #panel ul { padding-left: 20px; margin: 0; font-size: 1.1rem; }
+  #panel li { margin-bottom: 8px; }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 30px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div style="text-align:center;">
+  <header>
+    <h1>KI und ihre Anwendungen</h1>
+    <p>Klicke auf die Bereiche, um Details und Beispiele zu sehen</p>
+  </header>
+
+  <div class="stage">
+    <div class="center-node">KI im Alltag</div>
+    
+    <div class="flex-grid">
+      <div class="branch" style="--color: var(--lang);" data-target="lang">
+        <h3>💬 Große Sprachmodelle</h3>
+      </div>
+      <div class="branch" style="--color: var(--alltag);" data-target="alltag">
+        <h3>🏡 Alltag & Assistenz</h3>
+      </div>
+      <div class="branch" style="--color: var(--unterhaltung);" data-target="unterhaltung">
+        <h3>🎮 Unterhaltung & Medien</h3>
+      </div>
+      <div class="branch" style="--color: var(--mobil);" data-target="mobil">
+        <h3>🚗 Mobilität & Verkehr</h3>
+      </div>
+      <div class="branch" style="--color: var(--schulapps);" data-target="schulapps">
+        <h3>🏫 Schul-Apps</h3>
+      </div>
+    </div>
+
+    <div id="panel">
+      <h2 id="panel-title">Details</h2>
+      <ul id="panel-list"></ul>
+    </div>
+  </div>
+
+  <a href="ki.html" class="back-link">← Zurück zur Übersicht</a>
+</div>
+
+<script>
+const data = {
+  lang: {
+    title: "Große Sprachmodelle (LLMs)",
+    items: ["ChatGPT (OpenAI)", "Claude (Anthropic)", "Gemini (Google)", "Copilot (Microsoft)"]
+  },
+  alltag: {
+    title: "Alltag & Assistenz",
+    items: ["Smarte Assistenten (Siri, Alexa)", "Navigations-Apps (Stauvorhersage)", "Suchmaschinen-Erweiterungen"]
+  },
+  unterhaltung: {
+    title: "Unterhaltung & Medien",
+    items: ["Streaming-Empfehlungen (Netflix, Spotify)", "KI-Bildgeneratoren (Midjourney, DALL-E)", "Videospiel-NPCs"]
+  },
+  mobil: {
+    title: "Mobilität & Verkehr",
+    items: ["Autonomes Fahren / Assistenzsysteme", "Flugrouten-Optimierung", "Smarte Verkehrsleitung"]
+  },
+  schulapps: {
+    title: "Schul-Apps & Lernen",
+    items: ["Fremdsprachen-Trainer (Duolingo)", "Mathematik-Erklärer (Photomath)", "Digitale Lernkartensysteme"]
+  }
+};
+
+const panel = document.getElementById('panel');
+const panelTitle = document.getElementById('panel-title');
+const panelList = document.getElementById('panel-list');
+let openId = null;
+
+document.querySelectorAll('.branch').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const key = el.dataset.target;
+    if(openId === key){ panel.classList.remove('open'); openId = null; return; }
+    openId = key;
+    panelTitle.textContent = data[key].title;
+    panelList.innerHTML = data[key].items.map(i=>`<li>${i}</li>`).join('');
+    panel.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

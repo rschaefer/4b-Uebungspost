@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KI nutzen – oder lieber nicht?</title>
+<style>
+  :root {
+    --ink: #2b2b2b;
+    --bg: #fdf9f0;
+    --ja: #2E9E7E;
+    --nein: #C1447E;
+    --teil: #D9A431;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .container {
+    max-width: 750px;
+    width: 100%;
+    margin: auto;
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding: 10px 0 20px 0;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+
+  .view-pane {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    padding: 24px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Intro Styles */
+  .intro-content p {
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+  }
+  .q-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  @media (max-width: 500px) {
+    .q-grid { grid-template-columns: 1fr; }
+  }
+  .q-mini-card {
+    background: #fdfbf7;
+    border: 1px solid #eae5d9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  .q-mini-card b { display: block; margin-bottom: 2px; }
+
+  /* Quiz Step Styles */
+  .progress {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .situation {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .buttons button {
+    flex: 1;
+    min-width: 120px;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .buttons button:active { transform: scale(0.98); }
+  .btn-ja { background: var(--ja); }
+  .btn-teil { background: var(--teil); }
+  .btn-nein { background: var(--nein); }
+  .buttons button:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+  /* Feedback */
+  .feedback {
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .feedback.correct { background: #e9f7f0; border: 2px solid var(--ja); }
+  .feedback.wrong { background: #fdeceb; border: 2px solid var(--nein); }
+  .feedback.teil { background: #fdf4e2; border: 2px solid var(--teil); }
+  .feedback .tag { font-weight: 700; display: block; margin-bottom: 6px; }
+
+  /* Navigation & Action Buttons */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .btn-action {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .btn-action:hover { background: #444; }
+
+  .center-action {
+    justify-content: center;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 40px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🤖📚 KI nutzen – oder lieber nicht?</h1>
+  </header>
+
+  <div class="view-pane" id="view-pane">
+    <!-- Dynamischer Inhalt wird per JS injiziert -->
+  </div>
+
+  <a href="ki.html" class="back-link">← Zurück zur Übersicht</a>
+</div>
+
+<script>
+const cards = [
+  {
+    text: "Ich will wissen, wer gestern das Fußballspiel gewonnen hat.",
+    answer: "nein",
+    tag: "📅 Aktuelles Ereignis",
+    explain: "KI-Wissen kann veraltet oder schlicht falsch sein. Für aktuelle Ergebnisse ist eine Sport-News-Seite oder App zuverlässiger."
+  },
+  {
+    text: "Ich soll 10 neue Vokabeln lernen.",
+    answer: "nein",
+    tag: "🧠 Gehirn trainieren",
+    explain: "Das Einprägen muss dein Gehirn selbst tun – nur so bleibt es hängen. Lass dich hier nicht von KI abfragen oder Karten erstellen, sondern übe selbst."
+  },
+  {
+    text: "Ich rechne 45 + 27 im Matheheft.",
+    answer: "nein",
+    tag: "✏️ Selbst rechnen",
+    explain: "Das ist Übung fürs Kopfrechnen – rechne selbst oder nutze höchstens den Taschenrechner, aber keine KI."
+  },
+  {
+    text: "Ich will wissen, wie viele Einwohner Deutschland hat.",
+    answer: "nein",
+    tag: "🔎 Fakten-Quelle",
+    explain: "Für eine genaue, aktuelle Zahl ist eine bekannte Quelle wie Wikipedia besser als KI – genauso schnell, aber zuverlässiger."
+  },
+  {
+    text: "Ich bin traurig, weil ein Freund mich geärgert hat.",
+    answer: "nein",
+    tag: "❤️ Gefühle",
+    explain: "Bei echten Gefühlen und Sorgen hilft ein Gespräch mit einem Menschen, der dich kennt und mitfühlen kann."
+  },
+  {
+    text: "Ich soll einen Aufsatz über meine Ferien schreiben.",
+    answer: "teil",
+    tag: "✍️ Kreativität",
+    explain: "KI kann helfen, wenn du nicht weißt, worüber du schreiben sollst. Die eigentliche Geschichte muss aber aus dir kommen, sonst ist es nicht mehr dein Text.",
+    ki: "Ideen geben, wenn dir gar nichts einfällt",
+    ich: "die Geschichte selbst schreiben, deine eigenen Erlebnisse"
+  },
+  {
+    text: "Ich will ein schwieriges Wort aus dem Sachtext erklärt bekommen.",
+    answer: "teil",
+    tag: "📖 Verstehen",
+    explain: "KI darf dir Verständnishilfen geben – das Zusammenfassen und Verstehen musst du am Ende selbst schaffen.",
+    ki: "das Wort erklären",
+    ich: "den Text danach selbst in eigenen Worten zusammenfassen"
+  },
+  {
+    text: "Ich soll ein Referat über Vulkane vorbereiten.",
+    answer: "teil",
+    tag: "🌋 Recherche + eigene Worte",
+    explain: "KI als ersten Überblick nutzen ist ok – aber Fakten prüfen und den Vortrag selbst gestalten, gehört zu dir.",
+    ki: "Fachwörter erklären, groben Überblick geben",
+    ich: "Fakten in Buch/Lexikon prüfen, eigene Struktur, eigene Worte"
+  },
+  {
+    text: "Ich will wissen, ob meine Erfindungsidee gut ist.",
+    answer: "teil",
+    tag: "🧠 Eigene Meinung + Experte",
+    explain: "Deine eigene Idee zählt zuerst. Für eine wirklich gute Einschätzung ist danach eine Person mit Fachwissen (Lehrer:in, Eltern, Expert:in) oft besser als KI – die kann gezielt nachfragen und hat echte Erfahrung.",
+    ki: "erste Denkanstöße oder mögliche Schwachstellen aufzeigen",
+    ich: "die Idee erst selbst zu Ende denken, dann eine Person fragen, die sich auskennt"
+  },
+  {
+    text: "Ich streite mich mit meinem Bruder und weiß nicht, was ich tun soll.",
+    answer: "teil",
+    tag: "💬 Gespräch",
+    explain: "KI kann dir Worte vorschlagen. Das Gespräch und die Versöhnung selbst musst du als Mensch führen.",
+    ki: "Formulierungen vorschlagen, wie ich ruhig sagen kann, was mich stört",
+    ich: "das Gespräch selbst führen, zuhören, mich entschuldigen oder verzeihen"
+  },
+  {
+    text: "Ich will wissen, was bei der nächsten Wahl passiert.",
+    answer: "nein",
+    tag: "🗳️ Aktuelles Thema",
+    explain: "Bei Wahlen und Politik ist eine geprüfte, aktuelle Quelle (Nachrichten, offizielle Seiten) sicherer als KI, die veraltet oder ungenau sein kann."
+  },
+  {
+    text: "Ich soll ein Gedicht schreiben.",
+    answer: "nein",
+    tag: "🎨 Kreativität",
+    explain: "Ein Gedicht lebt von deinen eigenen Gedanken und Bildern. Lass KI hier nicht für dich schreiben, sonst ist es nicht mehr dein Gedicht."
+  },
+  {
+    text: "Ich will ein Bild für meine Geburtstagseinladung erstellen.",
+    answer: "teil",
+    tag: "🎉 Kreativ mit KI",
+    explain: "Hier darf KI den größeren Teil der Arbeit übernehmen – die persönliche Note kommt aber von dir.",
+    ki: "ein Bild erzeugen oder eine Textvorlage vorschlagen",
+    ich: "eigene Details ergänzen (Datum, Ort, persönliche Note)"
+  },
+  {
+    text: "Ich habe eine Matheaufgabe als Hausaufgabe, die ich nicht verstehe.",
+    answer: "teil",
+    tag: "🧮 Erklärung, nicht Lösung",
+    explain: "Lass dir das Prinzip erklären, aber die Hausaufgabe muss von dir gerechnet werden – sonst lernst du nichts für die nächste Aufgabe.",
+    ki: "den Rechenweg an einem Beispiel erklären",
+    ich: "die eigentliche Hausaufgabe selbst rechnen"
+  },
+  {
+    text: "Ich will herausfinden, was meine Meinung zu einem Streitthema ist.",
+    answer: "teil",
+    tag: "🗣️ Eigene Meinung entwickeln",
+    explain: "KI kann dir helfen, beide Seiten zu sehen. Die Entscheidung, was du selbst denkst, triffst du.",
+    ki: "Argumente von beiden Seiten zeigen, die ich noch nicht konnte",
+    ich: "mich am Ende selbst entscheiden, welche Meinung ich vertrete und warum"
+  },
+  {
+    text: "Ich will wissen, wie das Wetter morgen wird.",
+    answer: "nein",
+    tag: "🌦️ Aktuelle Quelle",
+    explain: "Wetter-Apps nutzen aktuelle Messdaten und Vorhersagemodelle. Eine KI im Chat hat diese Echtzeitdaten meist nicht und kann danebenliegen."
+  },
+  {
+    text: "Ich soll mein Referat vor der Klasse üben und vortragen.",
+    answer: "teil",
+    tag: "🎤 Üben mit Tipps",
+    explain: "Tipps von KI können helfen. Das eigentliche Üben und Vortragen ist Übungssache für dich selbst.",
+    ki: "Tipps geben, wie ich laut und deutlich sprechen kann",
+    ich: "das Üben und Vortragen selbst tun"
+  }
+];
+
+let currentIndex = -1; // -1 bedeutet Einleitungsseite
+
+const pane = document.getElementById('view-pane');
+
+function render() {
+  if (currentIndex === -1) {
+    // Einleitung rendern
+    pane.innerHTML = `
+      <div class="intro-content">
+        <p>Lest die Situation. Was ist hier der bessere Weg?</p>
+        <p>Achtet bei eurer Entscheidung besonders auf diese vier Fragen:</p>
+        <div class="q-grid">
+          <div class="q-mini-card">🧠 <b>Lernen & eigene Meinung</b>Fordert es mein Gehirn? Entwickle ich eine eigene Meinung?</div>
+          <div class="q-mini-card">⏱️ <b>Zeit</b>Geht es woanders schneller (Buch, selbst wissen)?</div>
+          <div class="q-mini-card">🌍 <b>Umwelt</b>Brauche ich die Rechenleistung und den Strom wirklich dafür?</div>
+          <div class="q-mini-card">❤️ <b>Gefühl & Medien</b>Erklärt ein echtes Gespräch oder ein Buch es nicht besser?</div>
+        </div>
+        <p style="font-size:0.85rem; color:#555; font-style:italic;">
+          💡 Als Bewegungsspiel im Klassenzimmer: eine Hand hoch = KI sinnvoll, eine Hand unten = lieber anders, beide Hände = teilweise.
+        </p>
+      </div>
+      <div class="actions center-action">
+        <button class="btn-action" onclick="nextStep()">Quiz starten</button>
+      </div>
+    `;
+  } else if (currentIndex < cards.length) {
+    // Quiz-Frage rendern
+    const c = cards[currentIndex];
+    pane.innerHTML = `
+      <div>
+        <div class="progress">Situation ${currentIndex + 1} von ${cards.length}</div>
+        <div class="situation">${c.text}</div>
+        <div class="buttons">
+          <button class="btn-ja" onclick="choose('ja')">🤖 KI sinnvoll</button>
+          <button class="btn-teil" onclick="choose('teil')">🤝 Teilweise</button>
+          <button class="btn-nein" onclick="choose('nein')">📚 Lieber anders</button>
+        </div>
+        <div id="quiz-feedback"></div>
+      </div>
+      <div class="actions" id="action-area" style="visibility: hidden;">
+        <button class="btn-action" onclick="nextStep()">Weiter</button>
+      </div>
+    `;
+  } else {
+    // Ergebnis / Ende rendern
+    pane.innerHTML = `
+      <div style="text-align:center; padding: 20px 0;">
+        <h2>Geschafft! 🎉</h2>
+        <p>Ihr habt alle Situationen durchgearbeitet und wisst nun genau, wann der Einsatz von KI sinnvoll ist und wann ihr lieber darauf verzichten solltet.</p>
+      </div>
+      <div class="actions center-action">
+        <button class="btn-action" onclick="resetQuiz()">Nochmal starten</button>
+      </div>
+    `;
+  }
+}
+
+function choose(choice) {
+  const c = cards[currentIndex];
+  const buttons = document.querySelectorAll('.buttons button');
+  buttons.forEach(btn => btn.disabled = true);
+
+  const fbDiv = document.getElementById('quiz-feedback');
+  const correct = choice === c.answer;
+  const cls = c.answer === 'teil' ? 'teil' : (correct ? 'correct' : 'wrong');
+  
+  fbDiv.className = `feedback ${cls}`;
+  
+  let html = `<span class="tag">${correct ? '✅ Passt!' : '🤔 Diskutiert das mal:'} (${c.tag})</span>`;
+  html += `<p style="margin:0 0 8px 0;">${c.explain}</p>`;
+  
+  if (c.ki && c.ich) {
+    html += `<div style="font-size:0.85rem; border-top:1px solid rgba(0,0,0,0.05); padding-top:60px; margin-top:8px;">
+      <strong>🤖 KI:</strong> ${c.ki}<br>
+      <strong>👤 ICH:</strong> ${c.ich}
+    </div>`;
+  }
+  
+  fbDiv.innerHTML = html;
+  document.getElementById('action-area').style.visibility = 'visible';
+}
+
+function nextStep() {
+  currentIndex++;
+  render();
+}
+
+function resetQuiz() {
+  currentIndex = -1;
+  render();
+}
+
+// Initialer Start
+render();
+</script>
+
+</body>
+</html>

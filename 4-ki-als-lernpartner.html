@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4. KI als Lernpartner – Die Zauber-Fragen</title>
+<style>
+  :root {
+    --bg: #fdf9f0;
+    --ink: #2b2b2b;
+    --accent: #5B7FDE;
+    --card-bg: #ffffff;
+    --border: #e6dfd3;
+    --wer-color: #2E9E7E;
+    --was-color: #C1447E;
+    --wie-color: #D9A431;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 40px 20px;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  header {
+    margin-bottom: 40px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 20px;
+  }
+  h1 { font-size: 2.2rem; margin: 0; color: #333; }
+  .subtitle { font-size: 1.2rem; color: #666; margin: 5px 0 0; }
+  
+  .slide-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 35px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    text-align: left;
+  }
+  h2 { font-size: 1.6rem; margin-top: 0; color: var(--accent); }
+  
+  .grid-3 {
+    display: table;
+    width: 100%;
+    margin: 30px 0;
+    table-layout: fixed;
+  }
+  .grid-col {
+    display: table-cell;
+    width: 33.33%;
+    padding: 20px;
+    background: #fcfbfa;
+    border: 2px solid var(--border);
+    border-top: 8px solid var(--c);
+    border-radius: 12px;
+    vertical-align: top;
+    text-align: center;
+  }
+  .grid-space {
+    display: table-cell;
+    width: 20px;
+  }
+  
+  .question-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  .question-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--c);
+    margin-bottom: 10px;
+  }
+  
+  .rules-list {
+    padding-left: 20px;
+    font-size: 1.1rem;
+  }
+  .rules-list li {
+    margin-bottom: 12px;
+  }
+  
+  .nav-buttons {
+    margin-top: 30px;
+  }
+  .btn-action {
+    background: var(--accent);
+    color: white;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+  }
+  .btn-action:hover {
+    background: #4569c4;
+  }
+  .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>4. KI als Lernpartner</h1>
+    <p class="subtitle">Die Regeln für das Schreiben mit einer KI (Klasse 4)</p>
+  </header>
+
+  <div class="slide-section">
+    <h2>Die 3 Zauber-Fragen</h2>
+    <p style="font-size: 1.15rem;">Wenn du mit einer KI sprichst, helfen dir diese drei Fragen, um eine richtig gute Antwort zu bekommen:</p>
+    
+    <div class="grid-3">
+      <div class="grid-col" style="--c: var(--wer-color);">
+        <div class="question-icon">🧑‍🏫</div>
+        <div class="question-title">1. WER?</div>
+        <p><strong>Rolle festlegen</strong></p>
+        <p style="font-size: 1.05rem; color: #444;">Sag der KI, wer sie sein soll.<br><br><em>„Du bist eine Grundschullehrerin.“</em></p>
+      </div>
+      <div class="grid-space"></div>
+      <div class="grid-col" style="--c: var(--was-color);">
+        <div class="question-icon">📝</div>
+        <div class="question-title">2. WAS?</div>
+        <p><strong>Aufgabe erklären</strong></p>
+        <p style="font-size: 1.05rem; color: #444;">Sag ganz genau, was sie tun soll.<br><br><em>„Erkläre den Wasserkreislauf.“</em></p>
+      </div>
+      <div class="grid-space"></div>
+      <div class="grid-col" style="--c: var(--wie-color);">
+        <div class="question-icon">📢</div>
+        <div class="question-title">3. WIE?</div>
+        <p><strong>Form bestimmen</strong></p>
+        <p style="font-size: 1.05rem; color: #444;">Wie soll die Antwort klingen?<br><br><em>„So, dass ein Kind es versteht.“</em></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-section">
+    <h2>Weitere goldene Regeln</h2>
+    <ul class="rules-list">
+      <li><strong>Präzise & konkret:</strong> Je genauer du fragst, desto besser wird das Ergebnis.</li>
+      <li><strong>Kontext geben:</strong> Erzähle der KI, wofür du die Hilfe brauchst.</li>
+      <li><strong>Nachfragen erlaubt:</strong> Wenn die Antwort zu schwer ist, sag einfach: „Erkläre es noch einfacher!“</li>
+    </ul>
+  </div>
+
+  <div class="nav-buttons">
+    <a href="5-ki-beispiele.html" class="btn-action">Zu den Beispielen & Prompts →</a>
+  </div>
+
+  <br>
+  <a href="ki.html" class="back-link">← Zurück zur Übersicht</a>
+</div>
+</body>
+</html>
