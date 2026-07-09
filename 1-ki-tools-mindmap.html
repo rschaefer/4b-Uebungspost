@@ -4,167 +4,256 @@
 <meta charset="UTF-8">
 <title>KI und ihre Anwendungen – Mindmap</title>
 <style>
-  :root {
-    --bg: #fdf9f0;
-    --ink: #2b2b2b;
-    --accent: #5B7FDE;
-    --card-bg: #ffffff;
-    --border: #e6dfd3;
-    --lang: #5B7FDE;
-    --alltag: #E0A227;
-    --unterhaltung: #C1447E;
-    --mobil: #2E9E7E;
-    --schulapps: #1F8A8C;
+  :root{
+    --bg:#fdf9f0;
+    --ink:#2b2b2b;
+    --lang:#5B7FDE;
+    --alltag:#E0A227;
+    --unterhaltung:#C1447E;
+    --mobil:#2E9E7E;
+    --wirtschaft:#8B5FBF;
+    --medizin:#D9534F;
+    --schulapps:#1F8A8C;
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Verdana, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    padding: 30px 20px;
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Verdana, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
   }
-  header {
-    text-align: center;
-    margin-bottom: 30px;
+  header{
+    text-align:center;
+    padding:22px 10px 10px;
   }
-  header h1 { margin: 0; font-size: 2rem; color: #333; }
-  header p { margin: 5px 0 0; color: #666; font-size: 1.1rem; }
-  
-  .stage {
-    position: relative;
-    max-width: 1000px;
-    margin: 0 auto;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  header h1{
+    margin:0;
+    font-size:1.6rem;
+    color:#333;
   }
-  
-  .center-node {
-    background: #edf4fe;
-    border: 2px solid var(--accent);
-    color: var(--ink);
-    padding: 20px;
-    font-weight: bold;
-    font-size: 1.4rem;
-    border-radius: 50%;
-    width: 140px;
-    height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 40px;
-    text-align: center;
+  header p{
+    margin:6px 0 0;
+    font-size:0.95rem;
+    color:#666;
   }
-  
-  .flex-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+  .stage{
+    position:relative;
+    width:min(1100px,96vw);
+    height:760px;
+    margin:20px auto 40px;
   }
-  
-  .branch {
-    background: var(--bg);
-    border-left: 5px solid var(--color);
-    padding: 15px;
-    border-radius: 6px;
-    width: 280px;
-    cursor: pointer;
-    transition: background 0.2s;
+  svg.lines{
+    position:absolute;
+    top:0;left:0;
+    width:100%;height:100%;
+    pointer-events:none;
   }
-  .branch:hover {
-    background: #f3edd8;
+  .node{
+    position:absolute;
+    border-radius:20px;
+    padding:14px 18px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12);
+    cursor:pointer;
+    user-select:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+    font-weight:600;
+    text-align:center;
   }
-  .branch h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.15rem;
-    color: var(--color);
+  .node:hover{
+    transform:translateY(-3px) scale(1.03);
+    box-shadow:0 8px 16px rgba(0,0,0,0.18);
   }
-  
-  #panel {
-    margin-top: 30px;
-    background: #faf7f0;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 25px;
-    display: none;
-    text-align: left;
+  .center{
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    width:200px;
+    background:#2b2b2b;
+    color:#fff;
+    border-radius:50%;
+    height:200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.15rem;
+    line-height:1.3;
+    z-index:5;
   }
-  #panel.open { display: block; }
-  #panel h2 { margin-top: 0; font-size: 1.4rem; color: var(--accent); }
-  #panel ul { padding-left: 20px; margin: 0; font-size: 1.1rem; }
-  #panel li { margin-bottom: 8px; }
+  .branch{
+    width:190px;
+    color:#fff;
+    font-size:1.02rem;
+  }
+  .branch .emoji{font-size:1.4rem; display:block; margin-bottom:4px;}
+  /* positions around the circle */
+  #b-lang{ left:1%; top:10%; background:var(--lang);}
+  #b-alltag{ left:68%; top:2%; background:var(--alltag);}
+  #b-schulapps{ left:83%; top:38%; background:var(--schulapps);}
+  #b-unterhaltung{ left:68%; top:74%; background:var(--unterhaltung);}
+  #b-mobil{ left:32%; top:84%; background:var(--mobil);}
+  #b-wirtschaft{ left:1%; top:60%; background:var(--wirtschaft);}
+  #b-medizin{ left:34%; top:0%; background:var(--medizin);}
 
-  .back-link {
-    display: inline-block;
-    margin-top: 30px;
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: bold;
+  .panel{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:#fff;
+    border-top:4px solid #333;
+    padding:18px 24px 22px;
+    max-height:40vh;
+    overflow-y:auto;
+    transform:translateY(100%);
+    transition:transform .25s ease;
+    box-shadow:0 -6px 20px rgba(0,0,0,0.15);
+  }
+  .panel.open{ transform:translateY(0); }
+  .panel h2{
+    margin:0 0 10px;
+    font-size:1.25rem;
+  }
+  .panel ul{
+    margin:0; padding-left:20px;
+    columns:2;
+    column-gap:30px;
+  }
+  .panel li{
+    margin-bottom:8px;
+    break-inside:avoid;
+    font-size:1rem;
+  }
+  .close-btn{
+    position:absolute;
+    top:12px; right:18px;
+    background:none;
+    border:none;
+    font-size:1.3rem;
+    cursor:pointer;
+    color:#888;
+  }
+  .hint{
+    text-align:center;
+    color:#999;
+    font-size:0.85rem;
+    margin-top:-10px;
+  }
+  @media (max-width:700px){
+    .stage{height:1320px;}
+    .center{width:150px;height:150px;font-size:0.95rem;}
+    .branch{width:140px;font-size:0.85rem;padding:10px 12px;}
+    #b-lang{ left:0%; top:2%;}
+    #b-medizin{ left:55%; top:0%;}
+    #b-alltag{ left:60%; top:16%;}
+    #b-schulapps{ left:0%; top:30%;}
+    #b-wirtschaft{ left:60%; top:44%;}
+    #b-unterhaltung{ left:0%; top:58%;}
+    #b-mobil{ left:55%; top:72%;}
+    .panel ul{columns:1;}
   }
 </style>
 </head>
 <body>
-<div style="text-align:center;">
-  <header>
-    <h1>KI und ihre Anwendungen</h1>
-    <p>Klicke auf die Bereiche, um Details und Beispiele zu sehen</p>
-  </header>
 
-  <div class="stage">
-    <div class="center-node">KI im Alltag</div>
-    
-    <div class="flex-grid">
-      <div class="branch" style="--color: var(--lang);" data-target="lang">
-        <h3>💬 Große Sprachmodelle</h3>
-      </div>
-      <div class="branch" style="--color: var(--alltag);" data-target="alltag">
-        <h3>🏡 Alltag & Assistenz</h3>
-      </div>
-      <div class="branch" style="--color: var(--unterhaltung);" data-target="unterhaltung">
-        <h3>🎮 Unterhaltung & Medien</h3>
-      </div>
-      <div class="branch" style="--color: var(--mobil);" data-target="mobil">
-        <h3>🚗 Mobilität & Verkehr</h3>
-      </div>
-      <div class="branch" style="--color: var(--schulapps);" data-target="schulapps">
-        <h3>🏫 Schul-Apps</h3>
-      </div>
-    </div>
+<header>
+  <h1>🤖 Künstliche Intelligenz und ihre Anwendungen</h1>
+  <p>Tippt auf einen Ast, um Beispiele zu sehen. Wohin passen eure eigenen Begriffe?</p>
+</header>
 
-    <div id="panel">
-      <h2 id="panel-title">Details</h2>
-      <ul id="panel-list"></ul>
-    </div>
+<div class="stage" id="stage">
+  <svg class="lines" id="lines"></svg>
+
+  <div class="node center">🤖<br>Künstliche<br>Intelligenz</div>
+
+  <div class="node branch" id="b-lang" data-target="lang">
+    <span class="emoji">💬</span>Sprache &amp;<br>Kommunikation
   </div>
+  <div class="node branch" id="b-alltag" data-target="alltag">
+    <span class="emoji">🏠</span>Alltag &amp;<br>Haushalt
+  </div>
+  <div class="node branch" id="b-unterhaltung" data-target="unterhaltung">
+    <span class="emoji">🎮</span>Fotos, Musik &amp;<br>Unterhaltung
+  </div>
+  <div class="node branch" id="b-mobil" data-target="mobil">
+    <span class="emoji">🚗</span>Mobilität
+  </div>
+  <div class="node branch" id="b-wirtschaft" data-target="wirtschaft">
+    <span class="emoji">🏭</span>Wirtschaft &amp;<br>Sicherheit
+  </div>
+  <div class="node branch" id="b-medizin" data-target="medizin">
+    <span class="emoji">🩺</span>Medizin &amp;<br>Forschung
+  </div>
+  <div class="node branch" id="b-schulapps" data-target="schulapps">
+    <span class="emoji">🏫</span>Schul-Apps
+  </div>
+</div>
 
-  <a href="ki.html" class="back-link">← Zurück zur Übersicht</a>
+<div class="panel" id="panel">
+  <button class="close-btn" onclick="closePanel()">✕</button>
+  <h2 id="panel-title"></h2>
+  <ul id="panel-list"></ul>
 </div>
 
 <script>
 const data = {
   lang: {
-    title: "Große Sprachmodelle (LLMs)",
-    items: ["ChatGPT (OpenAI)", "Claude (Anthropic)", "Gemini (Google)", "Copilot (Microsoft)"]
+    title: "💬 Sprache & Kommunikation",
+    items: [
+      "Chatbots wie ChatGPT, Gemini, Meta AI – führen Gespräche, schreiben Texte",
+      "Google-Suche mit KI-Zusammenfassungen – fasst Suchergebnisse automatisch zusammen",
+      "Sprachassistenten wie Alexa oder Siri – verstehen gesprochene Sprache",
+      "Telefonassistenten – vereinbaren z. B. Arzttermine",
+      "Übersetzungs-Apps wie DeepL oder Google Translate"
+    ]
   },
   alltag: {
-    title: "Alltag & Assistenz",
-    items: ["Smarte Assistenten (Siri, Alexa)", "Navigations-Apps (Stauvorhersage)", "Suchmaschinen-Erweiterungen"]
+    title: "🏠 Alltag & Haushalt",
+    items: [
+      "Smartphone-Kameras, die Gesichter erkennen und das Handy entsperren",
+      "Hausautomation – z. B. Heizung oder Licht, die sich an Gewohnheiten anpassen",
+      "Stromplanung & Batteriespeicher – KI plant, wann Strom gespeichert oder genutzt wird"
+    ]
   },
   unterhaltung: {
-    title: "Unterhaltung & Medien",
-    items: ["Streaming-Empfehlungen (Netflix, Spotify)", "KI-Bildgeneratoren (Midjourney, DALL-E)", "Videospiel-NPCs"]
+    title: "🎮 Fotos, Musik & Unterhaltung",
+    items: [
+      "Bildgeneratoren wie DALL-E  – erzeugen Bilder aus Textbeschreibungen",
+      "TikTok & Instagram – KI wählt Videos im Feed aus und steckt hinter vielen Gesichtsfiltern",
+      "Streaming-Dienste wie Netflix – geben Empfehlungen",
+      "Musik-Apps wie Spotify – erstellen persönliche Playlists",
+      "Suno AI – erzeugt komplett neue Songs aus einer Textbeschreibung",
+      "Spiele wie Roblox – KI erstellt Spielinhalte"
+    ]
   },
   mobil: {
-    title: "Mobilität & Verkehr",
-    items: ["Autonomes Fahren / Assistenzsysteme", "Flugrouten-Optimierung", "Smarte Verkehrsleitung"]
+    title: "🚗 Mobilität",
+    items: [
+      "Autonomes Fahren – z. B. Googles Waymo",
+      "Navigations-Apps wie Google Maps – berechnen die beste Route und sagen Stau voraus"
+    ]
+  },
+  wirtschaft: {
+    title: "🏭 Wirtschaft & Sicherheit",
+    items: [
+      "Betrugserkennungs-KI in Banken – prüft verdächtige Zahlungen",
+      "KI in der Qualitätskontrolle – erkennt fehlerhafte Produkte schneller als Menschen"
+    ]
+  },
+  medizin: {
+    title: "🩺 Medizin & Forschung",
+    items: [
+      "Neue Medikamente entdecken",
+      "Krebsfrüherkennung durch Bildanalyse",
+      "Analyse genetischer Daten für persönliche Therapieempfehlungen"
+    ]
   },
   schulapps: {
-    title: "Schul-Apps & Lernen",
-    items: ["Fremdsprachen-Trainer (Duolingo)", "Mathematik-Erklärer (Photomath)", "Digitale Lernkartensysteme"]
+    title: "🏫 Schul-Apps",
+    items: [
+      "FelloFish – KI-Feedbacktool, gibt Kindern automatisches Feedback zu ihren Texten",
+      "Kahoot! – erstellt mit KI automatisch Quizfragen zu einem Thema, PDF oder Wikipedia-Artikel",
+      "Canva – Design-Tool mit KI-Funktionen (erzeugt Bilder, entfernt Hintergründe)",
+      "Book Creator – digitale Bücher gestalten; KI wandelt Kinderskizzen in fertige Illustrationen um",
+      "NotebookLM – KI von Google, fasst Texte/Dokumente zusammen und beantwortet Fragen dazu"
+    ]
   }
 };
 
@@ -176,13 +265,38 @@ let openId = null;
 document.querySelectorAll('.branch').forEach(el=>{
   el.addEventListener('click', ()=>{
     const key = el.dataset.target;
-    if(openId === key){ panel.classList.remove('open'); openId = null; return; }
+    if(openId === key){ closePanel(); return; }
     openId = key;
     panelTitle.textContent = data[key].title;
     panelList.innerHTML = data[key].items.map(i=>`<li>${i}</li>`).join('');
     panel.classList.add('open');
   });
 });
+
+function closePanel(){
+  panel.classList.remove('open');
+  openId = null;
+}
+
+function drawLines(){
+  const svg = document.getElementById('lines');
+  const stage = document.getElementById('stage');
+  const rect = stage.getBoundingClientRect();
+  const center = document.querySelector('.center').getBoundingClientRect();
+  const cx = center.left + center.width/2 - rect.left;
+  const cy = center.top + center.height/2 - rect.top;
+  let out = '';
+  document.querySelectorAll('.branch').forEach(el=>{
+    const b = el.getBoundingClientRect();
+    const bx = b.left + b.width/2 - rect.left;
+    const by = b.top + b.height/2 - rect.top;
+    out += `<line x1="${cx}" y1="${cy}" x2="${bx}" y2="${by}" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>`;
+  });
+  svg.innerHTML = out;
+}
+window.addEventListener('load', drawLines);
+window.addEventListener('resize', drawLines);
 </script>
+
 </body>
 </html>

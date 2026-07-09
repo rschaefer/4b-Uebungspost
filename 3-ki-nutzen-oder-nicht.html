@@ -149,14 +149,6 @@
   .center-action {
     justify-content: center;
   }
-
-  .back-link {
-    display: inline-block;
-    margin-top: 40px;
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: bold;
-  }
 </style>
 </head>
 <body>
@@ -169,8 +161,6 @@
   <div class="view-pane" id="view-pane">
     <!-- Dynamischer Inhalt wird per JS injiziert -->
   </div>
-
-  <a href="ki.html" class="back-link">← Zurück zur Übersicht</a>
 </div>
 
 <script>
@@ -188,10 +178,26 @@ const cards = [
     explain: "Das Einprägen muss dein Gehirn selbst tun – nur so bleibt es hängen. Lass dich hier nicht von KI abfragen oder Karten erstellen, sondern übe selbst."
   },
   {
+    text: "Ich soll einen Aufsatz über meine Ferien schreiben.",
+    answer: "teil",
+    tag: "✍️ Kreativität",
+    explain: "KI kann helfen, wenn du nicht weißt, worüber du schreiben sollst. Die eigentliche Geschichte muss aber aus dir kommen, sonst ist es nicht mehr dein Text.",
+    ki: "Ideen geben, wenn dir gar nichts einfällt",
+    ich: "die Geschichte selbst schreiben, deine eigenen Erlebnisse"
+  },
+  {
     text: "Ich rechne 45 + 27 im Matheheft.",
     answer: "nein",
     tag: "✏️ Selbst rechnen",
     explain: "Das ist Übung fürs Kopfrechnen – rechne selbst oder nutze höchstens den Taschenrechner, aber keine KI."
+  },
+  {
+    text: "Ich will wissen, ob meine Erfindungsidee gut ist.",
+    answer: "teil",
+    tag: "🧠 Eigene Meinung + Experte",
+    explain: "Deine eigene Idee zählt zuerst. Für eine wirklich gute Einschätzung ist danach eine Person mit Fachwissen (Lehrer:in, Eltern, Expert:in) oft besser als KI – die kann gezielt nachfragen und hat echte Erfahrung.",
+    ki: "erste Denkanstöße oder mögliche Schwachstellen aufzeigen",
+    ich: "die Idee erst selbst zu Ende denken, dann eine Person fragen, die sich auskennt"
   },
   {
     text: "Ich will wissen, wie viele Einwohner Deutschland hat.",
@@ -204,14 +210,6 @@ const cards = [
     answer: "nein",
     tag: "❤️ Gefühle",
     explain: "Bei echten Gefühlen und Sorgen hilft ein Gespräch mit einem Menschen, der dich kennt und mitfühlen kann."
-  },
-  {
-    text: "Ich soll einen Aufsatz über meine Ferien schreiben.",
-    answer: "teil",
-    tag: "✍️ Kreativität",
-    explain: "KI kann helfen, wenn du nicht weißt, worüber du schreiben sollst. Die eigentliche Geschichte muss aber aus dir kommen, sonst ist es nicht mehr dein Text.",
-    ki: "Ideen geben, wenn dir gar nichts einfällt",
-    ich: "die Geschichte selbst schreiben, deine eigenen Erlebnisse"
   },
   {
     text: "Ich will ein schwieriges Wort aus dem Sachtext erklärt bekommen.",
@@ -228,14 +226,6 @@ const cards = [
     explain: "KI als ersten Überblick nutzen ist ok – aber Fakten prüfen und den Vortrag selbst gestalten, gehört zu dir.",
     ki: "Fachwörter erklären, groben Überblick geben",
     ich: "Fakten in Buch/Lexikon prüfen, eigene Struktur, eigene Worte"
-  },
-  {
-    text: "Ich will wissen, ob meine Erfindungsidee gut ist.",
-    answer: "teil",
-    tag: "🧠 Eigene Meinung + Experte",
-    explain: "Deine eigene Idee zählt zuerst. Für eine wirklich gute Einschätzung ist danach eine Person mit Fachwissen (Lehrer:in, Eltern, Expert:in) oft besser als KI – die kann gezielt nachfragen und hat echte Erfahrung.",
-    ki: "erste Denkanstöße oder mögliche Schwachstellen aufzeigen",
-    ich: "die Idee erst selbst zu Ende denken, dann eine Person fragen, die sich auskennt"
   },
   {
     text: "Ich streite mich mit meinem Bruder und weiß nicht, was ich tun soll.",
